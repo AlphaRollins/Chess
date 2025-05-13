@@ -1,0 +1,29 @@
+#gameBoard{
+    height: 320px;
+    width: 320px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.square svg{
+    height: 30px;
+    width: 30px;
+    margin: 5px;
+}
+
+.square{
+    height: 40px;
+    width: 40px;
+}
+.beige{
+    background-color: rgb(110,110,98);
+}
+.brown{
+    background-color: brown;
+}
+.black{
+    fill: black;
+}
+.white{
+    fill: white;
+}
