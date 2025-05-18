@@ -1,29 +1,32 @@
-#gameBoard{
-    height: 320px;
-    width: 320px;
-    display: flex;
-    flex-wrap: wrap;
+.chessboard {
+    display: inline-grid;
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(8, 60px);
+    border: 5px solid #333;
+    margin: auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
 }
 
-.square svg{
-    height: 30px;
-    width: 30px;
-    margin: 5px;
+.square {
+    width: 60px;
+    height: 60px;
 }
 
-.square{
-    height: 40px;
-    width: 40px;
+.white {
+    background-color: #f0d9b5;
 }
-.beige{
-    background-color: rgb(110,110,98);
+
+.black {
+    background-color: #b58863;
 }
-.brown{
-    background-color: brown;
+
+.page-title {
+    margin-top: 40px;
+    margin-bottom: 20px;
+    font-weight: bold;
 }
-.black{
-    fill: black;
-}
-.white{
-    fill: white;
+
+.square.selected {
+    outline: 3px solid #198754;
+    z-index: 2;
 }
