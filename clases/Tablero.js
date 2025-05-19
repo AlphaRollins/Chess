@@ -15,7 +15,7 @@ class Tablero {
                 let ficha = null;
                 if (fila < 2 || fila > 5) {
                     ficha = this.factory.crearProducto(fila, columna);
-                }
+                }   
                 this.casillas.push(new Casilla(fila, columna, ficha));
             }
         }

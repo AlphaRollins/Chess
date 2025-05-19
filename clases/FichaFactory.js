@@ -21,28 +21,38 @@ class FichaFactory {
 
     crearProducto(fila, columna) {
         let tipo = this.obtenerTipo(fila, columna)
-        let color = (fila < 2) ? 'negra' : 'blanca';
+        let color = (fila > 5) ? 'blanca' : 'negra';
 
+        let ficha;
         switch (tipo) {
             case 'torre':
-                return new Torre(color);
+                ficha = new Torre(color); break;
             case 'caballo':
-                return new Caballo(color);
+                ficha = new Caballo(color); break;
             case 'alfil':
-                return new Alfil(color);
+                ficha = new Alfil(color); break;
             case 'reina':
-                return new Reina(color);
+                ficha = new Reina(color); break;
             case 'rey':
-                return new Rey(color);
+                ficha = new Rey(color); break;
             case 'peon':
-                return new Peon(color);
+                ficha = new Peon(color); break;
         }
+        if (ficha && ficha.imagen) {
+            ficha.imagen = this.estilizarSVG(ficha.imagen, color);
+        }
+        return ficha;
+    }
+
+    estilizarSVG(svg, color) {
+        let clase = color === 'blanca' ? 'pieza-blanca' : 'pieza-negra';
+        return svg.replace('<svg ', `<svg class="${clase}" `);
     }
 
     obtenerTipo(fila, columna) {
-        return fila === 1 || fila === 6
-            ? 'peon'
-            : this.TIPOS[columna]
+        if (fila === 1) return 'peon';    
+        if (fila === 6) return 'peon';  
+        return this.TIPOS[columna]; 
     }
 
     mover(ficha, origen, destino, hayFichaEntre) {

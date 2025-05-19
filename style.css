@@ -10,7 +10,20 @@
 .square {
     width: 60px;
     height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
 }
+
+.square svg {
+    width: 44px;
+    height: 44px;
+    display: block;
+    fill: currentColor;
+}
+
 
 .white {
     background-color: #f0d9b5;
@@ -30,3 +43,40 @@
     outline: 3px solid #198754;
     z-index: 2;
 }
+
+.square.movible {
+    position: relative;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+.square.movible::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    background: #888;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.square.movible-captura {
+    position: relative;
+    cursor: pointer;
+    border: 3px solid #dc3545; 
+    box-sizing: border-box;
+}
+
+.square.movible-captura svg {
+    border: none;
+}
+
+.pieza-blanca { 
+    color: #fff; 
+    filter: drop-shadow(0 0 0 #222) drop-shadow(0 0 2px #222);
+}
+.pieza-negra { color: #222; }

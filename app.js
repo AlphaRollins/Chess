@@ -16,11 +16,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 `.square[data-x="${casilla.columna}"][data-y="${casilla.fila}"]`
             );
             if (square && casilla.ficha) {
-                square.textContent = casilla.ficha.imagen;
+                if (casilla.ficha.imagen && casilla.ficha.imagen.startsWith('<svg')) {
+                    square.innerHTML = casilla.ficha.imagen;
+                } else {
+                    square.textContent = casilla.ficha.imagen || '';
+                }
             } else if (square) {
-                square.textContent = '';
+                square.innerHTML = '';
             }
             square.classList.remove('selected');
+            square.classList.remove('movible');
         });
     }
 
@@ -55,6 +60,31 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
 
+    function mostrarMovimientosValidos(casillaSeleccionada) {
+        document.querySelectorAll('.square').forEach(sq => {
+            sq.classList.remove('movible');
+            sq.classList.remove('movible-captura');
+        });
+        if (!casillaSeleccionada || !casillaSeleccionada.ficha) return;
+        tablero.casillas.forEach(destino => {
+            if (
+                destino !== casillaSeleccionada &&
+                tablero.factory.mover(casillaSeleccionada.ficha, casillaSeleccionada, destino, hayFichaEntre)
+            ) {
+                const square = document.querySelector(
+                    `.square[data-x="${destino.columna}"][data-y="${destino.fila}"]`
+                );
+                if (square) {
+                    if (destino.ficha && destino.ficha.color !== casillaSeleccionada.ficha.color) {
+                        square.classList.add('movible-captura');
+                    } else {
+                        square.classList.add('movible');
+                    }
+                }
+            }
+        });
+    }
+
     function asignarEventos() {
         document.querySelectorAll('.square').forEach(square => {
             square.onclick = null;
@@ -64,7 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const y = parseInt(square.getAttribute('data-y'));
                 const casilla = tablero.casillas.find(c => c.columna === x && c.fila === y);
 
-                document.querySelectorAll('.square').forEach(sq => sq.classList.remove('selected'));
+                document.querySelectorAll('.square').forEach(sq => {
+                    sq.classList.remove('selected');
+                    sq.classList.remove('movible');
+                });
 
                 if (seleccion) {
                     if (
@@ -93,12 +126,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else if (casilla.ficha && casilla.ficha.color === turno) {
                         seleccion = casilla;
                         square.classList.add('selected');
+                        mostrarMovimientosValidos(seleccion);
                     } else {
                         seleccion = null;
                     }
                 } else if (casilla.ficha && casilla.ficha.color === turno) {
                     seleccion = casilla;
                     square.classList.add('selected');
+                    mostrarMovimientosValidos(seleccion);
                 }
             });
         });
