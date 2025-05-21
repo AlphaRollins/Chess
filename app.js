@@ -1,155 +1,209 @@
-// Importamos la clase Tablero desde otro archivo - esto es un patrón modular que ayuda a organizar el código
-import Tablero from "./clases/Tablero.js";
+import Pieza from './clases/Pieza.js';
 
-// Esperamos a que el DOM esté completamente cargado para no tener problemas con elementos que no existan todavía
 document.addEventListener('DOMContentLoaded', () => {
     // Variables principales del juego
-    let tablero;         // Objeto que maneja la lógica del tablero
-    let seleccion = null; // Guarda la casilla que el jugador ha seleccionado
-    let turno = 'blanca'; // Control de turno (blancas o negras)
-    let juegoTerminado = false; // Flag para saber si el juego terminó
+    let tablero = [];      // Array para almacenar el estado del tablero
+    let seleccion = null;  // Casilla seleccionada actualmente
+    let turno = 'blanca';  // Turno actual
+    let juegoTerminado = false;
 
-    // Deshabilitamos el tablero al inicio para que no se pueda jugar hasta que se presione "Jugar"
-    // Esto implementa el patrón de "Estado Inicial Seguro" donde la UI comienza en un estado controlado
+    // Deshabilitar tablero hasta que se presione "Jugar"
     document.querySelector('.chessboard').style.pointerEvents = 'none';
     document.querySelector('.chessboard').style.opacity = '0.5';
     document.getElementById('turno').style.visibility = 'hidden';
 
-    // Esta función implementa el patrón "Renderizado desde Modelo" donde la UI se actualiza
-    // completamente basándose en el estado del modelo de datos (tablero)
+    // Función para crear las piezas iniciales del tablero
+    function crearPiezas() {
+        // Limpiar el tablero
+        tablero = [];
+
+        // Crear un tablero de 8x8
+        for (let fila = 0; fila < 8; fila++) {
+            for (let columna = 0; columna < 8; columna++) {
+                // Crear casilla vacía por defecto
+                let pieza = null;
+
+                // Colocar peones
+                if (fila === 1) {
+                    pieza = new Pieza('peon', 'negra', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="44" height="44"><path fill="currentColor" d="M215.5 224c29.2-18.4 48.5-50.9 48.5-88c0-57.4-46.6-104-104-104S56 78.6 56 136c0 37.1 19.4 69.6 48.5 88L96 224c-17.7 0-32 14.3-32 32c0 16.5 12.5 30 28.5 31.8L80 400l160 0L227.5 287.8c16-1.8 28.5-15.3 28.5-31.8c0-17.7-14.3-32-32-32l-8.5 0zM22.6 473.4c-4.2 4.2-6.6 10-6.6 16C16 501.9 26.1 512 38.6 512l242.7 0c12.5 0 22.6-10.1 22.6-22.6c0-6-2.4-11.8-6.6-16L256 432 64 432 22.6 473.4z"/></svg>');
+                } else if (fila === 6) {
+                    pieza = new Pieza('peon', 'blanca', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="44" height="44"><path fill="currentColor" d="M215.5 224c29.2-18.4 48.5-50.9 48.5-88c0-57.4-46.6-104-104-104S56 78.6 56 136c0 37.1 19.4 69.6 48.5 88L96 224c-17.7 0-32 14.3-32 32c0 16.5 12.5 30 28.5 31.8L80 400l160 0L227.5 287.8c16-1.8 28.5-15.3 28.5-31.8c0-17.7-14.3-32-32-32l-8.5 0zM22.6 473.4c-4.2 4.2-6.6 10-6.6 16C16 501.9 26.1 512 38.6 512l242.7 0c12.5 0 22.6-10.1 22.6-22.6c0-6-2.4-11.8-6.6-16L256 432 64 432 22.6 473.4z"/></svg>');
+                }
+
+                // Colocar piezas en la primera fila (negras)
+                if (fila === 0) {
+                    if (columna === 0 || columna === 7) {
+                        pieza = new Pieza('torre', 'negra', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="44" height="44"><path fill="currentColor" d="M32 192L32 48c0-8.8 7.2-16 16-16l64 0c8.8 0 16 7.2 16 16l0 40c0 4.4 3.6 8 8 8l32 0c4.4 0 8-3.6 8-8l0-40c0-8.8 7.2-16 16-16l64 0c8.8 0 16 7.2 16 16l0 40c0 4.4 3.6 8 8 8l32 0c4.4 0 8-3.6 8-8l0-40c0-8.8 7.2-16 16-16l64 0c8.8 0 16 7.2 16 16l0 144c0 10.1-4.7 19.6-12.8 25.6L352 256l16 144L80 400 96 256 44.8 217.6C36.7 211.6 32 202.1 32 192zm176 96l32 0c8.8 0 16-7.2 16-16l0-48c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 48c0 8.8 7.2 16 16 16zM22.6 473.4L64 432l320 0 41.4 41.4c4.2 4.2 6.6 10 6.6 16c0 12.5-10.1 22.6-22.6 22.6L38.6 512C26.1 512 16 501.9 16 489.4c0-6 2.4-11.8 6.6-16z"/></svg>');
+                    } else if (columna === 1 || columna === 6) {
+                        pieza = new Pieza('caballo', 'negra', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="44" height="44"><path fill="currentColor" d="M96 48L82.7 61.3C70.7 73.3 64 89.5 64 106.5l0 132.4c0 10.7 5.3 20.7 14.2 26.6l10.6 7c14.3 9.6 32.7 10.7 48.1 3l3.2-1.6c2.6-1.3 5-2.8 7.3-4.5l49.4-37c6.6-5 15.7-5 22.3 0c10.2 7.7 9.9 23.1-.7 30.3L90.4 350C73.9 361.3 64 380 64 400l320 0 28.9-159c2.1-11.3 3.1-22.8 3.1-34.3l0-14.7C416 86 330 0 224 0L83.8 0C72.9 0 64 8.9 64 19.8c0 7.5 4.2 14.3 10.9 17.7L96 48zm24 68a20 20 0 1 1 40 0 20 20 0 1 1 -40 0zM22.6 473.4c-4.2 4.2-6.6 10-6.6 16C16 501.9 26.1 512 38.6 512l370.7 0c12.5 0 22.6-10.1 22.6-22.6c0-6-2.4-11.8-6.6-16L384 432 64 432 22.6 473.4z"/></svg>');
+                    } else if (columna === 2 || columna === 5) {
+                        pieza = new Pieza('alfil', 'negra', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="44" height="44"><path fill="currentColor" d="M128 0C110.3 0 96 14.3 96 32c0 16.1 11.9 29.4 27.4 31.7C78.4 106.8 8 190 8 288c0 47.4 30.8 72.3 56 84.7L64 400l192 0 0-27.3c25.2-12.5 56-37.4 56-84.7c0-37.3-10.2-72.4-25.3-104.1l-99.4 99.4c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6L270.8 154.6c-23.2-38.1-51.8-69.5-74.2-90.9C212.1 61.4 224 48.1 224 32c0-17.7-14.3-32-32-32L128 0zM48 432L6.6 473.4c-4.2 4.2-6.6 10-6.6 16C0 501.9 10.1 512 22.6 512l274.7 0c12.5 0 22.6-10.1 22.6-22.6c0-6-2.4-11.8-6.6-16L272 432 48 432z"/></svg>');
+                    } else if (columna === 3) {
+                        pieza = new Pieza('reina', 'negra', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="44" height="44"><path fill="currentColor" d="M256 0a56 56 0 1 1 0 112A56 56 0 1 1 256 0zM134.1 143.8c3.3-13 15-23.8 30.2-23.8c12.3 0 22.6 7.2 27.7 17c12 23.2 36.2 39 64 39s52-15.8 64-39c5.1-9.8 15.4-17 27.7-17c15.3 0 27 10.8 30.2 23.8c7 27.8 32.2 48.3 62.1 48.3c10.8 0 21-2.7 29.8-7.4c8.4-4.4 18.9-4.5 27.6 .9c13 8 17.1 25 9.2 38L399.7 400 384 400l-40.4 0-175.1 0L128 400l-15.7 0L5.4 223.6c-7.9-13-3.8-30 9.2-38c8.7-5.3 19.2-5.3 27.6-.9c8.9 4.7 19 7.4 29.8 7.4c29.9 0 55.1-20.5 62.1-48.3zM256 224s0 0 0 0s0 0 0 0s0 0 0 0zM112 432l288 0 41.4 41.4c4.2 4.2 6.6 10 6.6 16c0 12.5-10.1 22.6-22.6 22.6L86.6 512C74.1 512 64 501.9 64 489.4c0-6 2.4-11.8 6.6-16L112 432z"/></svg>');
+                    } else if (columna === 4) {
+                        pieza = new Pieza('rey', 'negra', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="44" height="44"><path fill="currentColor" d="M224 0c17.7 0 32 14.3 32 32l0 16 16 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-16 0 0 48 152 0c22.1 0 40 17.9 40 40c0 5.3-1 10.5-3.1 15.4L368 400 80 400 3.1 215.4C1 210.5 0 205.3 0 200c0-22.1 17.9-40 40-40l152 0 0-48-16 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l16 0 0-16c0-17.7 14.3-32 32-32zM38.6 473.4L80 432l288 0 41.4 41.4c4.2 4.2 6.6 10 6.6 16c0 12.5-10.1 22.6-22.6 22.6L54.6 512C42.1 512 32 501.9 32 489.4c0-6 2.4-11.8 6.6-16z"/></svg>');
+                    }
+                }
+
+                // Colocar piezas en la última fila (blancas)
+                if (fila === 7) {
+                    if (columna === 0 || columna === 7) {
+                        pieza = new Pieza('torre', 'blanca', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="44" height="44"><path fill="currentColor" d="M32 192L32 48c0-8.8 7.2-16 16-16l64 0c8.8 0 16 7.2 16 16l0 40c0 4.4 3.6 8 8 8l32 0c4.4 0 8-3.6 8-8l0-40c0-8.8 7.2-16 16-16l64 0c8.8 0 16 7.2 16 16l0 40c0 4.4 3.6 8 8 8l32 0c4.4 0 8-3.6 8-8l0-40c0-8.8 7.2-16 16-16l64 0c8.8 0 16 7.2 16 16l0 144c0 10.1-4.7 19.6-12.8 25.6L352 256l16 144L80 400 96 256 44.8 217.6C36.7 211.6 32 202.1 32 192zm176 96l32 0c8.8 0 16-7.2 16-16l0-48c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 48c0 8.8 7.2 16 16 16zM22.6 473.4L64 432l320 0 41.4 41.4c4.2 4.2 6.6 10 6.6 16c0 12.5-10.1 22.6-22.6 22.6L38.6 512C26.1 512 16 501.9 16 489.4c0-6 2.4-11.8 6.6-16z"/></svg>');
+                    } else if (columna === 1 || columna === 6) {
+                        pieza = new Pieza('caballo', 'blanca', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="44" height="44"><path fill="currentColor" d="M96 48L82.7 61.3C70.7 73.3 64 89.5 64 106.5l0 132.4c0 10.7 5.3 20.7 14.2 26.6l10.6 7c14.3 9.6 32.7 10.7 48.1 3l3.2-1.6c2.6-1.3 5-2.8 7.3-4.5l49.4-37c6.6-5 15.7-5 22.3 0c10.2 7.7 9.9 23.1-.7 30.3L90.4 350C73.9 361.3 64 380 64 400l320 0 28.9-159c2.1-11.3 3.1-22.8 3.1-34.3l0-14.7C416 86 330 0 224 0L83.8 0C72.9 0 64 8.9 64 19.8c0 7.5 4.2 14.3 10.9 17.7L96 48zm24 68a20 20 0 1 1 40 0 20 20 0 1 1 -40 0zM22.6 473.4c-4.2 4.2-6.6 10-6.6 16C16 501.9 26.1 512 38.6 512l370.7 0c12.5 0 22.6-10.1 22.6-22.6c0-6-2.4-11.8-6.6-16L384 432 64 432 22.6 473.4z"/></svg>');
+                    } else if (columna === 2 || columna === 5) {
+                        pieza = new Pieza('alfil', 'blanca', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="44" height="44"><path fill="currentColor" d="M128 0C110.3 0 96 14.3 96 32c0 16.1 11.9 29.4 27.4 31.7C78.4 106.8 8 190 8 288c0 47.4 30.8 72.3 56 84.7L64 400l192 0 0-27.3c25.2-12.5 56-37.4 56-84.7c0-37.3-10.2-72.4-25.3-104.1l-99.4 99.4c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6L270.8 154.6c-23.2-38.1-51.8-69.5-74.2-90.9C212.1 61.4 224 48.1 224 32c0-17.7-14.3-32-32-32L128 0zM48 432L6.6 473.4c-4.2 4.2-6.6 10-6.6 16C0 501.9 10.1 512 22.6 512l274.7 0c12.5 0 22.6-10.1 22.6-22.6c0-6-2.4-11.8-6.6-16L272 432 48 432z"/></svg>');
+                    } else if (columna === 3) {
+                        pieza = new Pieza('reina', 'blanca', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="44" height="44"><path fill="currentColor" d="M256 0a56 56 0 1 1 0 112A56 56 0 1 1 256 0zM134.1 143.8c3.3-13 15-23.8 30.2-23.8c12.3 0 22.6 7.2 27.7 17c12 23.2 36.2 39 64 39s52-15.8 64-39c5.1-9.8 15.4-17 27.7-17c15.3 0 27 10.8 30.2 23.8c7 27.8 32.2 48.3 62.1 48.3c10.8 0 21-2.7 29.8-7.4c8.4-4.4 18.9-4.5 27.6 .9c13 8 17.1 25 9.2 38L399.7 400 384 400l-40.4 0-175.1 0L128 400l-15.7 0L5.4 223.6c-7.9-13-3.8-30 9.2-38c8.7-5.3 19.2-5.3 27.6-.9c8.9 4.7 19 7.4 29.8 7.4c29.9 0 55.1-20.5 62.1-48.3zM256 224s0 0 0 0s0 0 0 0s0 0 0 0zM112 432l288 0 41.4 41.4c4.2 4.2 6.6 10 6.6 16c0 12.5-10.1 22.6-22.6 22.6L86.6 512C74.1 512 64 501.9 64 489.4c0-6 2.4-11.8 6.6-16L112 432z"/></svg>');
+                    } else if (columna === 4) {
+                        pieza = new Pieza('rey', 'blanca', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="44" height="44"><path fill="currentColor" d="M224 0c17.7 0 32 14.3 32 32l0 16 16 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-16 0 0 48 152 0c22.1 0 40 17.9 40 40c0 5.3-1 10.5-3.1 15.4L368 400 80 400 3.1 215.4C1 210.5 0 205.3 0 200c0-22.1 17.9-40 40-40l152 0 0-48-16 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l16 0 0-16c0-17.7 14.3-32 32-32zM38.6 473.4L80 432l288 0 41.4 41.4c4.2 4.2 6.6 10 6.6 16c0 12.5-10.1 22.6-22.6 22.6L54.6 512C42.1 512 32 501.9 32 489.4c0-6 2.4-11.8 6.6-16z"/></svg>');
+                    }
+                }
+
+                // Añadir casilla al tablero
+                tablero.push({
+                    fila,
+                    columna,
+                    pieza
+                });
+            }
+        }
+    }
+    // Función simplificada para renderizar el tablero
     function renderTablero() {
-        // Iteramos sobre cada casilla del modelo usando el método Array.forEach
-        tablero.casillas.forEach(casilla => {
-            // Usamos selectores CSS avanzados para encontrar el elemento DOM correspondiente
-            // mediante los atributos data-* que funcionan como identificadores únicos
-            const square = document.querySelector(
+        tablero.forEach(casilla => {
+            const domCasilla = document.querySelector(
                 `.square[data-x="${casilla.columna}"][data-y="${casilla.fila}"]`
             );
 
-            // Implementación del patrón "Estado Condicional" donde el contenido
-            // depende del estado de la casilla (si tiene ficha o no)
-            if (square && casilla.ficha) {
-                // Manejo especial para SVGs, reconociendo el tipo de contenido
-                // Esto permite flexibilidad en la representación visual
-                if (casilla.ficha.imagen && casilla.ficha.imagen.startsWith('<svg')) {
-                    square.innerHTML = casilla.ficha.imagen;
-                } else {
-                    square.textContent = casilla.ficha.imagen || '';
-                }
-            } else if (square) {
-                // Limpieza de elementos vacíos para mantener el DOM limpio
-                square.innerHTML = '';
-            }
+            if (domCasilla) {
+                // Limpiar casilla
+                domCasilla.innerHTML = '';
 
-            // Reseteo de clases CSS para evitar estados visuales inconsistentes
-            // Esto es parte del patrón "UI Determinista"
-            square.classList.remove('selected');
-            square.classList.remove('movible');
+                // Si hay una pieza, mostrarla
+                if (casilla.pieza) {
+                    domCasilla.innerHTML = casilla.pieza.imagen;
+                }
+
+                // Resetear clases
+                domCasilla.classList.remove('selected');
+                domCasilla.classList.remove('movible');
+                domCasilla.classList.remove('movible-captura');
+            }
         });
     }
 
-    // Algoritmo de "Detección de Colisiones" para piezas que no pueden saltar otras
-    // Implementa un recorrido lineal entre dos puntos usando incrementos unitarios
-    function hayFichaEntre(origen, destino) {
-        // Cálculo de dirección usando la función Math.sign que devuelve -1, 0 o 1
-        // Esta es una forma elegante de obtener la dirección del movimiento
-        let dx = Math.sign(destino.columna - origen.columna);
-        let dy = Math.sign(destino.fila - origen.fila);
+    // Función simple para verificar si hay piezas entre dos posiciones
+    function hayPiezaEntre(origen, destino) {
+        // Calcular la dirección del movimiento
+        const dx = Math.sign(destino.columna - origen.columna);
+        const dy = Math.sign(destino.fila - origen.fila);
 
-        // Empezamos en la primera casilla después del origen para evitar contar la pieza misma
+        // Empezar desde la casilla después del origen
         let x = origen.columna + dx;
         let y = origen.fila + dy;
 
-        // Búsqueda lineal utilizando un bucle while con condición compuesta
+        // Revisar cada casilla en el camino
         while (x !== destino.columna || y !== destino.fila) {
-            // Usamos Array.find como una búsqueda eficiente en el array de casillas
-            // Retornamos true inmediatamente si encontramos una obstrucción
-            if (tablero.casillas.find(c => c.columna === x && c.fila === y && c.ficha)) return true;
-            // Avanzamos a la siguiente casilla en la dirección calculada
+            // Si hay una pieza en el camino, devolver true
+            if (tablero.find(c => c.columna === x && c.fila === y && c.pieza)) {
+                return true;
+            }
+
+            // Avanzar a la siguiente casilla
             x += dx;
             y += dy;
         }
-        // Si completamos el recorrido sin encontrar obstáculos, el camino está libre
+
+        // Si no hay piezas en el camino, devolver false
         return false;
     }
 
-    // Implementación de una regla básica del ajedrez: detección de jaque
-    // Utiliza un enfoque de "fuerza bruta optimizada" verificando todas las piezas enemigas
-    function reyEnJaque(color) {
-        // Primero localizamos el rey usando reflection (constructor.name) y filtrado
-        const rey = tablero.casillas.find(c =>
-            c.ficha &&
-            c.ficha.constructor.name === "Rey" &&
-            c.ficha.color === color
-        );
+    // Función simplificada para verificar si un movimiento es válido
+    function esMovimientoValido(origen, destino) {
+        // Si no hay pieza en el origen, el movimiento no es válido
+        if (!origen.pieza) return false;
 
-        // Manejo de caso borde (aunque raro en un juego normal)
-        if (!rey) return false;
+        // No se puede mover a una casilla ocupada por una pieza del mismo color
+        if (destino.pieza && destino.pieza.color === origen.pieza.color) return false;
 
-        // Uso del método Array.some que devuelve true si algún elemento cumple la condición
-        // Esto es más eficiente que filter+length ya que se detiene en la primera coincidencia
-        return tablero.casillas.some(c =>
-            c.ficha &&
-            c.ficha.color !== color &&
-            // Delegamos la verificación de movimiento a la factory, siguiendo el principio de responsabilidad única
-            tablero.factory.mover(c.ficha, c, rey, hayFichaEntre)
-        );
+        // Calcular desplazamiento
+        const dx = destino.columna - origen.columna;
+        const dy = destino.fila - origen.fila;
+
+        // Reglas según el tipo de pieza
+        switch (origen.pieza.tipo) {
+            case 'peon':
+                const direccion = origen.pieza.color === 'blanca' ? -1 : 1;
+                const filaInicial = origen.pieza.color === 'blanca' ? 6 : 1;
+
+                // Movimiento normal (avanzar 1 casilla)
+                if (dx === 0 && dy === direccion && !destino.pieza) {
+                    return true;
+                }
+
+                // Movimiento inicial (avanzar 2 casillas)
+                if (dx === 0 && dy === 2 * direccion && origen.fila === filaInicial &&
+                    !destino.pieza && !hayPiezaEntre(origen, destino)) {
+                    return true;
+                }
+
+                // Captura (diagonal)
+                if (Math.abs(dx) === 1 && dy === direccion && destino.pieza &&
+                    destino.pieza.color !== origen.pieza.color) {
+                    return true;
+                }
+
+                return false;
+
+            case 'torre':
+                // Movimiento en línea recta (horizontal o vertical)
+                return (dx === 0 || dy === 0) && !hayPiezaEntre(origen, destino);
+
+            case 'caballo':
+                // Movimiento en L (no le afectan las piezas intermedias)
+                return (Math.abs(dx) === 2 && Math.abs(dy) === 1) ||
+                    (Math.abs(dx) === 1 && Math.abs(dy) === 2);
+
+            case 'alfil':
+                // Movimiento diagonal
+                return Math.abs(dx) === Math.abs(dy) && !hayPiezaEntre(origen, destino);
+
+            case 'reina':
+                // Combinación de torre y alfil
+                return ((dx === 0 || dy === 0) || Math.abs(dx) === Math.abs(dy)) &&
+                    !hayPiezaEntre(origen, destino);
+
+            case 'rey':
+                // Se mueve 1 casilla en cualquier dirección
+                return Math.abs(dx) <= 1 && Math.abs(dy) <= 1;
+
+            default:
+                return false;
+        }
     }
 
-    // Detección de condición de victoria basada en la presencia de reyes
-    // Implementa el patrón "Estado de Juego" verificando una condición terminal
-    function hayVictoria() {
-        // Búsqueda por filtrado con criterios múltiples
-        const reyBlanco = tablero.casillas.find(c =>
-            c.ficha &&
-            c.ficha.constructor.name === "Rey" &&
-            c.ficha.color === "blanca"
-        );
-        const reyNegro = tablero.casillas.find(c =>
-            c.ficha &&
-            c.ficha.constructor.name === "Rey" &&
-            c.ficha.color === "negra"
-        );
-
-        // Lógica condicional simple que determina al ganador
-        // basándose en la ausencia de un rey (capturado)
-        if (!reyBlanco) return "negras";
-        if (!reyNegro) return "blancas";
-
-        // Retorno nulo indica que el juego continúa
-        return null;
-    }
-
-    // Implementación visual de ayuda al usuario mostrando movimientos posibles
-    // Esto mejora la usabilidad siguiendo el principio de "Feedback Inmediato"
+    // Función para destacar los movimientos válidos
     function mostrarMovimientosValidos(casillaSeleccionada) {
-        // Limpieza de estado visual previo usando querySelectorAll para obtener todos los elementos
+        // Resetear todas las casillas
         document.querySelectorAll('.square').forEach(sq => {
             sq.classList.remove('movible');
             sq.classList.remove('movible-captura');
         });
 
-        // Verificación de precondición para evitar procesamiento innecesario
-        if (!casillaSeleccionada || !casillaSeleccionada.ficha) return;
+        // Si no hay selección, salir
+        if (!casillaSeleccionada || !casillaSeleccionada.pieza) return;
 
-        // Análisis exhaustivo de todas las casillas como destinos potenciales
-        tablero.casillas.forEach(destino => {
-            // Validación compuesta de movimiento:
-            // 1. No es la misma casilla
-            // 2. El movimiento es válido según las reglas de la pieza
-            if (
-                destino !== casillaSeleccionada &&
-                tablero.factory.mover(casillaSeleccionada.ficha, casillaSeleccionada, destino, hayFichaEntre)
-            ) {
-                // Localización del elemento DOM correspondiente usando selectores data-*
+        // Probar cada casilla como posible destino
+        tablero.forEach(destino => {
+            if (destino !== casillaSeleccionada && esMovimientoValido(casillaSeleccionada, destino)) {
                 const square = document.querySelector(
                     `.square[data-x="${destino.columna}"][data-y="${destino.fila}"]`
                 );
 
                 if (square) {
-                    // Diferenciación visual entre movimiento normal y captura
-                    // Esto mejora la UX al proporcionar información contextual
-                    if (destino.ficha && destino.ficha.color !== casillaSeleccionada.ficha.color) {
+                    // Diferenciar entre movimiento y captura
+                    if (destino.pieza && destino.pieza.color !== casillaSeleccionada.pieza.color) {
                         square.classList.add('movible-captura');
                     } else {
                         square.classList.add('movible');
@@ -159,87 +213,115 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Configuración de la interactividad del tablero usando eventos
-    // Implementa el patrón "Delegación de Eventos" a nivel de casillas
+    // Función para buscar el rey de un color determinado
+    function buscarRey(color) {
+        return tablero.find(c => c.pieza && c.pieza.tipo === 'rey' && c.pieza.color === color);
+    }
+
+    // Función para verificar si un rey está en jaque
+    function reyEnJaque(color) {
+        const rey = buscarRey(color);
+        if (!rey) return false;
+
+        // Verificar si alguna pieza enemiga puede capturar al rey
+        return tablero.some(casilla =>
+            casilla.pieza &&
+            casilla.pieza.color !== color &&
+            esMovimientoValido(casilla, rey)
+        );
+    }
+
+    // Función para verificar si hay victoria (rey capturado)
+    function hayVictoria() {
+        const reyBlanco = buscarRey('blanca');
+        const reyNegro = buscarRey('negra');
+
+        if (!reyBlanco) return "negras";
+        if (!reyNegro) return "blancas";
+
+        return null;
+    }
+
+    // Función para actualizar la indicación de turno
+    function actualizarTurno() {
+        if (juegoTerminado) return;
+
+        const turnoElem = document.getElementById('turno');
+        if (turnoElem) {
+            turnoElem.textContent = `Turno: ${turno === 'blanca' ? 'Blancas' : 'Negras'}`;
+        }
+    }
+
+    // Asignar eventos de clic a las casillas
     function asignarEventos() {
-        // Seleccionamos todas las casillas para asignar eventos
         document.querySelectorAll('.square').forEach(square => {
-            // Eliminamos eventos previos para evitar duplicación
-            // Esto es crucial al reiniciar o actualizar el juego
+            // Eliminar eventos previos
             square.onclick = null;
 
-            // Asignamos el nuevo manejador de eventos
+            // Asignar nuevo evento
             square.addEventListener('click', () => {
-                // Verificación de estado de juego como guardia
+                // Si el juego terminó, no hacer nada
                 if (juegoTerminado) return;
 
-                // Extracción de datos del DOM y conversión a enteros
-                // Los atributos data-* se recuperan como strings
+                // Obtener coordenadas
                 const x = parseInt(square.getAttribute('data-x'));
                 const y = parseInt(square.getAttribute('data-y'));
 
-                // Mapeo del elemento DOM a su correspondiente objeto en el modelo
-                const casilla = tablero.casillas.find(c => c.columna === x && c.fila === y);
+                // Obtener la casilla correspondiente
+                const casilla = tablero.find(c => c.columna === x && c.fila === y);
 
-                // Reseteo visual como preparación para actualización
+                // Resetear resaltados
                 document.querySelectorAll('.square').forEach(sq => {
                     sq.classList.remove('selected');
                     sq.classList.remove('movible');
+                    sq.classList.remove('movible-captura');
                 });
 
-                // LÓGICA PRINCIPAL DEL JUEGO: Manejo de selección y movimiento
-                // Implementa una máquina de estados simple con dos estados principales:
-                // 1. Con selección previa: intentar mover o cambiar selección
-                // 2. Sin selección: seleccionar pieza propia
-
+                // Si ya hay una casilla seleccionada
                 if (seleccion) {
-                    // CASO 1: Intento de movimiento con pieza ya seleccionada
-                    if (
-                        seleccion.ficha &&
-                        tablero.factory.mover(seleccion.ficha, seleccion, casilla, hayFichaEntre)
-                    ) {
-                        // Ejecución del movimiento en el modelo de datos
-                        // Esto sigue el patrón "Modelo Primero, UI Después"
-                        casilla.ficha = seleccion.ficha;
-                        seleccion.ficha = null;
+                    // Intentar mover
+                    if (esMovimientoValido(seleccion, casilla)) {
+                        // Realizar el movimiento
+                        casilla.pieza = seleccion.pieza;
+                        seleccion.pieza = null;
                         seleccion = null;
 
-                        // Cambio de turno usando operador ternario para alternancia
+                        // Cambiar turno
                         turno = turno === 'blanca' ? 'negra' : 'blanca';
 
-                        // Actualización de UI y estado
+                        // Actualizar tablero
                         renderTablero();
-                        asignarEventos();
                         actualizarTurno();
 
-                        // Verificación de condición de victoria
+                        // Verificar victoria
                         const ganador = hayVictoria();
                         if (ganador) {
-                            // Manejo de fin de juego con actualización de UI
                             juegoTerminado = true;
-                            document.getElementById('turno').textContent = `¡Victoria de las ${ganador.charAt(0).toUpperCase() + ganador.slice(1)}!`;
+                            document.getElementById('turno').textContent =
+                                `¡Victoria de las ${ganador.charAt(0).toUpperCase() + ganador.slice(1)}!`;
                             document.querySelector('.chessboard').style.pointerEvents = 'none';
                             return;
                         }
 
-                        // Verificación y notificación de jaque
+                        // Verificar jaque
                         if (reyEnJaque(turno)) {
-                            document.getElementById('turno').textContent = `¡Jaque a las ${turno === 'blanca' ? 'Blancas' : 'Negras'}!`;
+                            document.getElementById('turno').textContent =
+                                `¡Jaque a las ${turno === 'blanca' ? 'Blancas' : 'Negras'}!`;
                         }
                     }
-                    // CASO 2: Cambio de selección a otra pieza propia
-                    else if (casilla.ficha && casilla.ficha.color === turno) {
+                    // Si se hace clic en una pieza propia, cambiar la selección
+                    else if (casilla.pieza && casilla.pieza.color === turno) {
                         seleccion = casilla;
                         square.classList.add('selected');
                         mostrarMovimientosValidos(seleccion);
                     }
-                    // CASO 3: Cancelación de selección
+                    // Si se hace clic en una casilla vacía o una pieza enemiga, cancelar selección
                     else {
                         seleccion = null;
                     }
                 }
-                // CASO 4: Primera selección (sin selección previa)
-                else if (casilla.ficha && casilla.ficha.color === turno) {
+                // Si no hay selección previa y se hace clic en una pieza propia
+                else if (casilla.pieza && casilla.pieza.color === turno) {
                     seleccion = casilla;
                     square.classList.add('selected');
                     mostrarMovimientosValidos(seleccion);
@@ -248,64 +330,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Actualización de la información de turno en la UI
-    // Implementa el patrón "Vista sincronizada con Modelo"
-    function actualizarTurno() {
-        // Verificación de precondición
-        if (juegoTerminado) return;
-
-        // Acceso al elemento DOM y actualización condicional de contenido
-        const turnoElem = document.getElementById('turno');
-        if (turnoElem) {
-            turnoElem.textContent = `Turno: ${turno === 'blanca' ? 'Blancas' : 'Negras'}`;
-        }
-    }
-
-    // Configuración del botón de inicio de juego
-    // Implementa el patrón "Controlador de Acción" vinculando un evento a una secuencia de acciones
+    // Botón de inicio
     document.getElementById('iniciar_juego').addEventListener('click', () => {
-        // Inicialización del estado del juego creando una nueva instancia
-        // Este es un ejemplo claro del uso de clases y objetos en JS
-        tablero = new Tablero();
+        // Inicializar juego
+        crearPiezas();
         seleccion = null;
         turno = 'blanca';
         juegoTerminado = false;
 
-        // Secuencia de actualización de UI
+        // Actualizar tablero
         renderTablero();
         asignarEventos();
         actualizarTurno();
 
-        // Activación visual y funcional del tablero
+        // Activar tablero
         document.querySelector('.chessboard').style.pointerEvents = 'auto';
         document.querySelector('.chessboard').style.opacity = '1';
         document.getElementById('turno').style.visibility = 'visible';
 
-        // Alternancia de botones para la fase de juego
+        // Cambiar botones
         document.getElementById('iniciar_juego').style.display = 'none';
         document.getElementById('reiniciar_juego').style.display = 'inline-block';
     });
 
-    // Configuración del botón de reinicio
-    // Similar al inicio pero preservando el estado de la UI
+    // Botón de reinicio
     document.getElementById('reiniciar_juego').addEventListener('click', () => {
-        // Reinicialización del estado del juego
-        tablero = new Tablero();
+        // Reiniciar juego
+        crearPiezas();
         seleccion = null;
         turno = 'blanca';
         juegoTerminado = false;
 
-        // Actualización de UI
+        // Actualizar tablero
         renderTablero();
         asignarEventos();
         actualizarTurno();
 
-        // Aseguramos que el tablero esté activado
+        // Asegurar que el tablero esté activado
         document.querySelector('.chessboard').style.pointerEvents = 'auto';
         document.querySelector('.chessboard').style.opacity = '1';
     });
 
-    // Configuración inicial ocultando el botón de reinicio
-    // Esto implementa el estado inicial consistente
+    // Ocultar botón de reinicio al inicio
     document.getElementById('reiniciar_juego').style.display = 'none';
 });
