@@ -136,7 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'peon':
                 const direccion = origen.pieza.color === 'blanca' ? -1 : 1;
                 const filaInicial = origen.pieza.color === 'blanca' ? 6 : 1;
-
                 // Movimiento normal (avanzar 1 casilla)
                 if (dx === 0 && dy === direccion && !destino.pieza) {
                     return true;
